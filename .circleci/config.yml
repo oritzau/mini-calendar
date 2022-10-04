@@ -1,47 +1,59 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
-version: 2.1
+#returns first day of given year
+def first_day_of_year(year):
+    return int((2 + (year-1901) + (year-1901)/4) % 7)
 
-# Orbs are reusable packages of CircleCI configuration that you may share across projects, enabling you to create encapsulated, parameterized commands, jobs, and executors that can be used across multiple projects.
-# See: https://circleci.com/docs/2.0/orb-intro/
-orbs:
-  # The python orb contains a set of prepackaged CircleCI configuration you can use repeatedly in your configuration files
-  # Orb commands and jobs help you with common scripting around a language/tool
-  # so you dont have to copy and paste it everywhere.
-  # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
-  python: circleci/python@1.5.0
+#returns day in words
+def day_num_to_words(day_num):
+    day_list = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    day_in_words = day_list[day_num]
+    return day_in_words
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
-jobs:
-  build-and-test: # This is the name of the job, feel free to change it to better match what you're trying to do!
-    # These next lines defines a Docker executors: https://circleci.com/docs/2.0/executor-types/
-    # You can specify an image from Dockerhub or use one of the convenience images from CircleCI's Developer Hub
-    # A list of available CircleCI Docker convenience images are available here: https://circleci.com/developer/images/image/cimg/python
-    # The executor is the environment in which the steps below will be executed - below will use a python 3.10.2 container
-    # Change the version below to your required version of python
-    docker:
-      - image: cimg/python:3.10.2
-    # Checkout the code as the first step. This is a dedicated CircleCI step.
-    # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
-    # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
-    # Then run your tests!
-    # CircleCI will report the results back to your VCS provider.
-    steps:
-      - checkout
-      - python/install-packages:
-          pkg-manager: pip
-          # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
-          # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.
-      - run:
-          name: Run tests
-          # This assumes pytest is installed via the install-package step above
-          command: pytest
+#returns month in words
+def month_num_to_words(month_num):
+    month_list = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    return month_list[month_num - 1]
 
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
-workflows:
-  sample: # This is the name of the workflow, feel free to change it to better match your workflow.
-    # Inside the workflow, you define the jobs you want to run.
-    jobs:
-      - build-and-test
+#returns first day of month as number
+def first_day_month_in_year(year, month):
+    first_day_of_year = int((2 + (year-1901) + (year-1901)/4) % 7)
+    days_in_month_list = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    first_day_month_in_year = first_day_of_year
+    counter = 0
+    while counter < month - 1:
+        if counter == 1:
+            if year % 4 == 0:
+                first_day_month_in_year += 29
+                counter += 1
+            else:
+                first_day_month_in_year += 28
+                counter += 1
+        else:
+            first_day_month_in_year += days_in_month_list[counter]
+            counter += 1
+    return first_day_month_in_year % 7
+
+#returns number of days in month
+def num_of_days(month_num, year):
+    days_in_month_list = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    if month_num != 2:
+        return days_in_month_list[month_num - 1]
+    elif month_num == 2:
+        if year % 4 == 0:
+            return 29
+        else:
+            return days_in_month_list[month_num - 1]
+
+#takes year and month as arguments and prints calendar info
+if __name__ == "__main__":
+    month = int(input('Month: '))
+    while month < 0 or month > 12:
+        print('Month must be between 1 and 12')
+        month = int(input('Month: '))
+    year = int(input('Year: '))
+
+    first_day = first_day_of_year(year)
+    print('\n')
+    print(f'The first day of {month_num_to_words(month)} is on a {day_num_to_words(first_day_month_in_year(year, month))} \n')
+    print(f'The first day of {year} is on a {day_num_to_words(first_day)}\n')
+    print(f'{month_num_to_words(month)} has {num_of_days(month,year)} days')
+ 
